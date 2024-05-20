@@ -1,0 +1,26 @@
+#!/bin/bash
+leer_op()
+{
+menu=$(dialog --stdout --menu "Menu" 0 0 8 1 "Dar/Quitar permisos" 2 "Creación de (Directiorio/Fichero)" 3 "Monitorear Sistema" 4 "Gestion de Tareas" 5 "Desinstalar Paquetes" 6 "Cifrar o Hacer copia de Seguridad de archivo" 7 "Gestionar Usuarios"  8 "Salir")
+}
+leer_op
+if [ $? -eq 0 ]
+then
+	while [ $menu -ne 8 ]
+	do
+		case $menu in
+		1)./darQuitarPermisos;;
+		2)./crearDirectorioFichero;;
+		3)./monitoreoSistema;;
+		4)./gestionDeTareas;;
+		5)./desinstalarPaquetes;;
+		6)./copiaSeguridadYCifrado;;
+		7)./gestionUsuarios;;
+		esac
+	leer_op
+	done
+	dialog --infobox "Se ha seleccionado SALIR, finalizará el programa" 0 0
+else
+	dialog --infobox "Has cancelado" 0 0
+fi
+

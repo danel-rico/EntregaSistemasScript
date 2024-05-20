@@ -1,0 +1,52 @@
+#!/bin/bash
+
+dar_permisos() {
+    archivo="$1"
+    chmod +x "$archivo" 2> Errores
+    dialog --msgbox "Permisos dados a $archivo" 0 0
+}
+
+quitar_permisos() {
+    archivo="$1"
+    chmod -x "$archivo" 2> Errores
+    dialog --msgbox "Permisos quitados a $archivo" 0 0
+}
+
+leer_op() {
+    opcion=$(dialog --stdout --menu "Seleccionar una opción" 0 0 3 1 "Otorgar permisos a un archivo" 2 "Quitar permisos a un archivo" 3 "SALIR")
+    echo "$opcion"
+}
+
+while true; do
+    opcion=$(leer_op)
+    if [ $? -eq 1 ]; then
+        dialog --infobox "Has cancelado" 0 0
+        break
+    fi
+
+    case $opcion in
+        1)
+            archivo=$(dialog --stdout --inputbox "Introduce el nombre del archivo:" 0 0)
+            if [ -f "$archivo" ]; then
+                dar_permisos "$archivo"
+            else
+                dialog --msgbox "El archivo no existe" 0 0
+            fi
+            ;;
+        2)
+            archivo=$(dialog --stdout --inputbox "Introduce el nombre del archivo:" 0 0)
+            if [ -f "$archivo" ]; then
+                quitar_permisos "$archivo"
+            else
+                dialog --msgbox "El archivo no existe" 0 0
+            fi
+            ;;
+        3)
+            dialog --infobox "Se ha seleccionado SALIR, finalizará el programa" 0 0
+            break
+            ;;
+        *)
+            dialog --msgbox "Opción no válida" 0 0
+            ;;
+    esac
+done

@@ -1,0 +1,80 @@
+#!/bin/bash
+
+crear_usuario() {
+    usuario=$(dialog --stdout --inputbox "Introduce el nombre del nuevo usuario:" 0 0)
+    if [ -n "$usuario" ]; then
+        if sudo adduser --disabled-password --gecos "" --force-badname  "$usuario" 2>>Errores; then
+            dialog --msgbox "Usuario $usuario creado correctamente" 0 0
+        else
+            dialog --msgbox "Hubo un error al intentar crear el usuario $usuario. Revisa el archivo de errores para más detalles." 0 0
+        fi
+    else
+        dialog --msgbox "El nombre de usuario no puede estar vacío" 0 0
+    fi
+}
+
+asignar_permisos() {
+    usuario=$(dialog --stdout --inputbox "Introduce el nombre del usuario al que deseas asignar permisos:" 0 0)
+    if [ -n "$usuario" ]; then
+        if id "$usuario" &>>Errores; then
+            if sudo usermod -aG sudo "$usuario" 2>>Errores; then
+                dialog --msgbox "Permiso asignado a $usuario" 0 0
+            else
+                dialog --msgbox "Hubo un error al asignar permisos a $usuario. Revisa el archivo de errores para más detalles." 0 0
+            fi
+        else
+            dialog --msgbox "El usuario $usuario no existe" 0 0
+        fi
+    else
+        dialog --msgbox "El nombre de usuario no puede estar vacío" 0 0
+    fi
+}
+
+dar_de_baja() {
+    usuario=$(dialog --stdout --inputbox "Introduce el nombre del usuario que deseas dar de baja:" 0 0)
+    if [ -n "$usuario" ]; then
+        if id "$usuario" &>>Errores; then
+            if sudo deluser --remove-home "$usuario" 2>>Errores; then
+                dialog --msgbox "Usuario $usuario dado de baja correctamente" 0 0
+            else
+                dialog --msgbox "Hubo un error al dar de baja al usuario $usuario. Revisa el archivo de errores para más detalles." 0 0
+            fi
+        else
+            dialog --msgbox "El usuario $usuario no existe" 0 0
+        fi
+    else
+        dialog --msgbox "El nombre de usuario no puede estar vacío" 0 0
+    fi
+}
+
+leer_op() {
+    opcion=$(dialog --stdout --menu "Menú de Administración de Usuarios" 0 0 4 1 "Crear Usuario" 2 "Asignar Permisos" 3 "Dar de Baja Usuario" 4 "Salir")
+    echo $opcion
+}
+
+while true; do
+    opcion=$(leer_op)
+    if [ $? -ne 0 ]; then
+        dialog --infobox "Has cancelado" 0 0
+        break
+    fi
+
+    case $opcion in
+        1)
+            crear_usuario
+            ;;
+        2)
+            asignar_permisos
+            ;;
+        3)
+            dar_de_baja
+            ;;
+        4)
+            dialog --infobox "Se ha seleccionado SALIR, se cerrará el programa" 0 0
+            break
+            ;;
+        *)
+            dialog --msgbox "Opción no válida" 0 0
+            ;;
+    esac
+done

@@ -1,0 +1,45 @@
+#!/bin/bash
+
+listar_paquetes() {
+    dpkg --get-selections | awk '{print $1}' > paquetes.txt
+}
+
+desinstalar_paquete() {
+    paquetes=$(cat paquetes.txt | nl)
+    paquete=$(dialog --stdout --menu "Selecciona un paquete para desinstalar" 20 50 15 $(echo "$paquetes" | awk '{print $1 " " $2}'))
+    
+    if [ -z "$paquete" ]; then
+        dialog --infobox "Has cancelado la eliminación de paquete" 20 50
+    else
+        paquete_nombre=$(sed "${paquete}q;d" paquetes.txt)
+        sudo apt-get remove --purge -y "$paquete_nombre"
+        dialog --msgbox "El paquete $paquete_nombre ha sido desinstalado" 20 50
+    fi
+}
+
+leer_op() {
+    opcion=$(dialog --stdout --menu "Menu" 0 0 2 1 "Desinstalar Paquete" 2 "Salir")
+    echo $opcion
+}
+
+listar_paquetes
+while true; do
+    opcion=$(leer_op)
+    if [ $? -eq 1 ]; then
+        dialog --infobox "Has cancelado" 20 50
+        break
+    fi
+
+    case $opcion in
+        1)
+            desinstalar_paquete
+            ;;
+        2)
+            dialog --infobox "Se ha seleccionado SALIR, se cerrará el programa" 20 50
+            break
+            ;;
+        *)
+            dialog --msgbox "Opción no válida" 20 50
+            ;;
+    esac
+done

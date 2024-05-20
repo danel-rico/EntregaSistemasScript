@@ -1,0 +1,50 @@
+#!/bin/bash
+
+crear_directorio() {
+    nombre=$(dialog --stdout --inputbox "Introduce el nombre de un Directorio" 0 0)
+    if [ -d "$nombre" ]; then
+        dialog --msgbox "El directorio $nombre ya existe" 0 0
+    else
+        mkdir "$nombre"
+        dialog --msgbox "El directorio $nombre se ha creado correctamente" 0 0
+    fi
+}
+
+crear_fichero() {
+    nombre=$(dialog --stdout --inputbox "Introduce el nombre de un Fichero" 0 0)
+    if [ -e "$nombre" ]; then
+        dialog --msgbox "El fichero $nombre ya existe" 0 0
+    else
+        touch "$nombre"
+        dialog --msgbox "El fichero $nombre se ha creado correctamente" 0 0
+    fi
+}
+
+leer_op() {
+    opcion=$(dialog --stdout --menu "Menu" 0 0 3 1 "Crear Directorio" 2 "Crear Fichero" 3 "Salir")
+    echo "$opcion"
+}
+
+while true; do
+    opcion=$(leer_op)
+    if [ $? -eq 1 ]; then
+        dialog --infobox "Has cancelado" 0 0
+        break
+    fi
+
+    case $opcion in
+        1)
+            crear_directorio
+            ;;
+        2)
+            crear_fichero
+            ;;
+        3)
+            dialog --infobox "Se ha seleccionado SALIR, se cerrará el programa" 0 0
+            break
+            ;;
+        *)
+            dialog --msgbox "Opción no válida" 0 0
+            ;;
+    esac
+done

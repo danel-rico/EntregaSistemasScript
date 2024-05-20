@@ -1,0 +1,69 @@
+#!/bin/bash
+
+ARCHIVO_TAREAS="tareas.txt"
+
+agregar_tarea() {
+    tarea=$(dialog --stdout --inputbox "Introduce la tarea:" 0 0)
+    if [ -n "$tarea" ]; then
+        echo "$tarea" >> "$ARCHIVO_TAREAS"
+    else
+        dialog --msgbox "No se ha introducido ninguna tarea" 0 0
+    fi
+}
+
+ver_tareas() {
+    if [ -s "$ARCHIVO_TAREAS" ]; then
+        tareas=$(cat "$ARCHIVO_TAREAS" | nl)
+        dialog --msgbox "$tareas" 20 50
+    else
+        dialog --msgbox "No hay tareas para mostrar" 0 0
+    fi
+}
+
+eliminar_tarea() {
+    if [ -s "$ARCHIVO_TAREAS" ]; then
+        tareas=$(cat "$ARCHIVO_TAREAS" | nl)
+        tarea=$(dialog --stdout --menu "Selecciona una tarea para eliminar" 20 50 15 $(echo "$tareas" | awk '{print $1 " " $0}'))
+        
+        if [ -n "$tarea" ]; then
+            sed -i "${tarea}d" "$ARCHIVO_TAREAS"
+            dialog --msgbox "La tarea ha sido eliminada" 0 0
+        else
+            dialog --msgbox "No se ha seleccionado ninguna tarea" 0 0
+        fi
+    else
+        dialog --msgbox "No hay tareas para eliminar" 0 0
+    fi
+}
+
+leer_op() {
+    opcion=$(dialog --stdout --menu "Menu" 0 0 4 1 "Agregar Tarea" 2 "Ver Tareas" 3 "Eliminar Tarea" 4 "Salir")
+    echo $opcion
+}
+
+while true; do
+    opcion=$(leer_op)
+    if [ $? -ne 0 ]; then
+        dialog --infobox "Has cancelado" 0 0
+        break
+    fi
+
+    case $opcion in
+        1)
+            agregar_tarea
+            ;;
+        2)
+            ver_tareas
+            ;;
+        3)
+            eliminar_tarea
+            ;;
+        4)
+            dialog --infobox "Se ha seleccionado SALIR, se cerrará el programa" 0 0
+            break
+            ;;
+        *)
+            dialog --msgbox "Opción no válida" 0 0
+            ;;
+    esac
+done

@@ -1,0 +1,20 @@
+#!/bin/bash
+
+TIEMPO_MAXIMO=10
+TIEMPO_INICIO=$(date +%s)
+
+while true; do
+    TIEMPO_ACTUAL=$(date +%s)
+    TIEMPO_PASADO=$((TIEMPO_ACTUAL - TIEMPO_INICIO))
+    if [ $TIEMPO_PASADO -ge $TIEMPO_MAXIMO ]; then
+        break
+    fi
+
+    cpu=$(top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4}')
+    mem=$(free -m | awk 'NR==2{printf "%.2f", $3*100/$2 }')
+    disk=$(df -h | grep '/$' | awk '{print $5}')
+
+    dialog --title "Monitoreo del Sistema" --infobox "CPU: $cpu%\nMemoria: $mem%\nDisco: $disk\nTiempo transcurrido: $TIEMPO_PASADO s" 10 50
+
+    sleep 1
+done

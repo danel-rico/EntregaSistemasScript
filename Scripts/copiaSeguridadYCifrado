@@ -1,0 +1,60 @@
+#!/bin/bash
+ARCHIVO_DESTINO=""
+
+elegir_archivo() {
+    ARCHIVO_DESTINO=$(dialog --stdout --title "Seleccionar archivo" --fselect $HOME/ 14 48)
+    if [ -z "$ARCHIVO_DESTINO" ]; then
+        dialog --msgbox "No se ha seleccionado ningún archivo" 0 0
+        exit 1
+    fi
+}
+
+copia_seguridad() {
+    elegir_archivo
+    if [ -f "$ARCHIVO_DESTINO" ]; then
+        cp "$ARCHIVO_DESTINO" "$ARCHIVO_DESTINO.bak"
+        dialog --msgbox "Copia de seguridad creada: $ARCHIVO_DESTINO.bak" 0 0
+    else
+        dialog --msgbox "El archivo no existe" 0 0
+    fi
+}
+
+cifrar_archivo() {
+    elegir_archivo
+    if [ -f "$ARCHIVO_DESTINO" ]; then
+        gpg --yes --batch --passphrase $(dialog --stdout --passwordbox "Introduce la contraseña de cifrado" 0 0) -c "$ARCHIVO_DESTINO"
+        dialog --msgbox "Archivo cifrado: $ARCHIVO_DESTINO.gpg" 0 0
+    else
+        dialog --msgbox "El archivo no existe" 0 0
+    fi
+}
+
+leer_op() {
+    opcion=$(dialog --stdout --menu "Menu" 0 0 3 1 "Hacer copia de seguridad" 2 "Cifrar archivo" 3 "Salir")
+    echo $opcion
+}
+
+while true; do
+    opcion=$(leer_op)
+    if [ $? -ne 0 ]; then
+        dialog --infobox "Has cancelado" 0 0
+        break
+    fi
+
+    case $opcion in
+        1)
+            copia_seguridad
+            ;;
+        2)
+            cifrar_archivo
+            ;;
+        3)
+            dialog --infobox "Se ha seleccionado SALIR, se cerrará el programa" 0 0
+            break
+            ;;
+        *)
+            dialog --msgbox "Opción no válida" 0 0
+            ;;
+    esac
+done
+
